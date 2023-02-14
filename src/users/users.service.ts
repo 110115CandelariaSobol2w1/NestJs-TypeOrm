@@ -5,14 +5,13 @@ import { CreateUserDto } from './DTO/create-user.dto';
 import { user } from './user.entity';
 import * as argon2 from 'argon2';
 import { LoginUserDto } from './DTO/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
 
-    constructor(
-        @InjectRepository(user)
-        private userRepository: Repository<user>,
-      ) {}
+    constructor(@InjectRepository(user) private userRepository: Repository <user>, 
+    private jwtService: JwtService){}
     
       async findAll(): Promise<user[]> {
         return await this.userRepository.find();
@@ -37,7 +36,13 @@ export class UsersService {
 
     if(!validatePassword) throw new HttpException('PASSWORD INCORRECT', 403);
 
-    const data = findUser;
+    const payload = {id:findUser.IdUsuario, name : findUser.username, IdRol: findUser.IdRol};
+    const token = this.jwtService.sign(payload);
+
+    const data = {
+        user: findUser, token,
+    };
+
     return data;
 
 
