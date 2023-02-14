@@ -19,7 +19,7 @@ import { user } from './users/user.entity';
     pet,user
    ],
     extra:{trustServerCertificate:true}
-  }), UsersModule, PetsModule],
+  }), UsersModule, PetsModule,],
   controllers: [AppController],
   providers: [AppService],
 })
