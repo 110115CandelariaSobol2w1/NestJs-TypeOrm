@@ -29,7 +29,7 @@ export class PetsService {
 
       async paginate(options: IPaginationOptions): Promise<Pagination<pet>> {
         const queryBuilder = this.petsRepository.createQueryBuilder('c');
-        queryBuilder.orderBy('IdMascota', 'DESC'); // Or whatever you need to do
+        queryBuilder.orderBy('IdMascota'); 
     
         return paginate<pet>(queryBuilder, options);
       }
