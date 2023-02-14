@@ -34,6 +34,10 @@ export class PetsService {
         return paginate<pet>(queryBuilder, options);
       }
 
+      async obtenerMascotasCliente(IdCliente: number): Promise<pet[]> {
+        return this.petsRepository.find({ where: { IdCliente: IdCliente } });
+      }
+
 
 
 }

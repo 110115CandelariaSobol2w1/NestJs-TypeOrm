@@ -41,4 +41,10 @@ export class PetsController {
     });
   }
 
+
+  @Get('/usuarios/:IdCliente')
+  async obtenerMascotasCliente(@Param('IdCliente') IdCliente: number): Promise<pet[]> {
+    return this.petService.obtenerMascotasCliente(IdCliente);
+  }
+
 }
