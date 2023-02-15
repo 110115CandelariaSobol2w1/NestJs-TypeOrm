@@ -7,6 +7,7 @@ import {JwtModule} from '@nestjs/jwt';
 import {jwtConstanst } from './JWT/jwt.constants';
 import { JwtStrategy } from './JWT/jwt.strategy';
 
+
 @Module({
   imports:[TypeOrmModule.forFeature([user]),
   JwtModule.register({

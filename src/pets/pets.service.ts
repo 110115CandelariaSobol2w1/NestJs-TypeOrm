@@ -34,10 +34,13 @@ export class PetsService {
         return paginate<pet>(queryBuilder, options);
       }
 
-      async obtenerMascotasCliente(IdCliente: number): Promise<pet[]> {
-        return this.petsRepository.find({ where: { IdCliente: IdCliente } });
+
+      //obtenemos mascotas por id de cliente
+      async obtenerMascotasCliente(IdUsuario: number): Promise<pet[]> {
+        return this.petsRepository.find({ where: { IdCliente: IdUsuario } });
       }
 
+    
 
 
 }

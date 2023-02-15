@@ -1,10 +1,11 @@
-import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { JwtAuthGuard } from 'src/users/JWT/jwt-auth.guards';
 import { Roles } from 'src/users/JWT/roles.decorator';
 import { CreatePetDto } from './DTO/create-pet.dto';
 import { pet } from './pet.entity';
 import { PetsService } from './pets.service';
+import { JwtStrategy } from 'src/users/JWT/jwt.strategy';
 
 @Controller('pets')
 export class PetsController {
@@ -40,11 +41,14 @@ export class PetsController {
       route: 'http://localhost:3000/pets/paginacion?page=2&limit=5',
     });
   }
-
-
-  @Get('/usuarios/:IdCliente')
-  async obtenerMascotasCliente(@Param('IdCliente') IdCliente: number): Promise<pet[]> {
+  
+ 
+  @UseGuards(JwtAuthGuard)
+  @Get('/usuarios/:IdUsuario')
+  async obtenerMascotasCliente(@Param('IdUsuario') IdCliente: number, @Req() req){
     return this.petService.obtenerMascotasCliente(IdCliente);
   }
 
+
+ 
 }
