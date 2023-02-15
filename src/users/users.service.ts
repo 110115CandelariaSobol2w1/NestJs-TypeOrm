@@ -36,13 +36,14 @@ export class UsersService {
 
     if(!validatePassword) throw new HttpException('PASSWORD INCORRECT', 403);
 
-    const payload = {id:findUser.IdUsuario, name : findUser.username, IdRol: findUser.IdRol};
+    const payload = {IdUsuario:findUser.IdUsuario, name : findUser.username, IdRol: findUser.IdRol};
     const token = this.jwtService.sign(payload);
 
     const data = {
         user: findUser, token,
     };
 
+    console.log(payload)
     return data;
 
 
