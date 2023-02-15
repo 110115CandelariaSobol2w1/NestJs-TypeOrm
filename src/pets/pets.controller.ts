@@ -41,18 +41,10 @@ export class PetsController {
       route: 'http://localhost:3000/pets/paginacion?page=2&limit=5',
     });
   }
-<<<<<<< HEAD
-  
- 
-  @UseGuards(JwtAuthGuard)
-  @Get('/usuarios/:IdUsuario')
-  async obtenerMascotasCliente(@Param('IdUsuario') IdCliente: number, @Req() req){
-=======
 
   @UseGuards(JwtAuthGuard)
   @Get('/usuarios/:IdCliente')
   async obtenerMascotasCliente(@Param('IdCliente') IdCliente: number){
->>>>>>> 79e0d28 (agrego el error funciona todo ok)
     return this.petService.obtenerMascotasCliente(IdCliente);
   }
 
