@@ -43,9 +43,9 @@ export class PetsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/usuarios/:IdCliente')
-  async obtenerMascotasCliente(@Param('IdCliente') IdCliente: number){
-    return this.petService.obtenerMascotasCliente(IdCliente);
+  @Get('/usuarios/:IdUsuario')
+  async obtenerMascotasCliente(@Param('IdUsuario') IdUsuario: number, @Req() req){
+    return this.petService.obtenerMascotasCliente(IdUsuario);
   }
 
 

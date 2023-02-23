@@ -28,16 +28,16 @@ export class JwtStrategy extends PassportStrategy(Strategy){
     // }
 
     async validate(req:Request, payload:any){
-        const IdUsuario = +req.params.IdCliente;
+        const IdUsuario = +req.params.IdUsuario;
         console.log(IdUsuario + "id usuario")  
-        console.log(payload.id + "id Cliente")
+        console.log(payload.IdUsuario + "id Cliente")
 
         if(payload.IdRol ===1){
 
             return { IdUsuario: payload.IdUsuario} 
         }
         
-        if(IdUsuario !== payload.id)
+        if(IdUsuario !== payload.IdUsuario)
         {
             throw new HttpException('UNAUTHORIZED USER', 401)
         }
