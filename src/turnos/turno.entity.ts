@@ -17,4 +17,7 @@ export class turno{
 
     @Column()
     IdEstado:number
+
+    @Column()
+    IdPsicologo:number
 }

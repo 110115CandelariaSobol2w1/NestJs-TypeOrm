@@ -1,4 +1,8 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { consultarTurnosDto } from './DTO/consultar-turnos.dto';
+import { registrarTurnoDto } from './DTO/registrar-turno.dto';
+import { terminarCitaDto } from './DTO/terminar-cita.dto';
+import { turno } from './turno.entity';
 import { TurnosService } from './turnos.service';
 
 @Controller('turnos')
@@ -31,4 +35,25 @@ export class TurnosController {
     obtenerMascotasTurnosHistorial(@Param('IdMascota') IdMascota: number){
         return this.turnosService.infoMascotaTurno(IdMascota);
     }
+
+    //7
+    @Get('/psicologos')
+    consultarTurnos(@Body() turno : consultarTurnosDto) {
+       return this.turnosService.consultarTurnos(turno)
+      }
+
+
+      //registrar turno
+      @Post('/probando')
+      registrarTurno(@Body()turno : registrarTurnoDto){
+          return this.turnosService.register(turno)
+          
+          
+      }
+
+      //8
+      @Post('/terminar')
+      terminarCita(@Body() turno: terminarCitaDto){
+        return this.turnosService.terminarCita(turno)
+      }
 }

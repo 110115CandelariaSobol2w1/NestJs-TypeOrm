@@ -6,6 +6,8 @@ import { UsersModule } from './users/users.module';
 import { PetsModule } from './pets/pets.module';
 import { pet } from './pets/pet.entity';
 import { user } from './users/user.entity';
+import { TurnosModule } from './turnos/turnos.module';
+import { turno } from './turnos/turno.entity';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -16,10 +18,10 @@ import { user } from './users/user.entity';
     password: '12345678',
     database: 'Mascotas',
     entities: [
-    pet,user
+    pet,user, turno
    ],
     extra:{trustServerCertificate:true}
-  }), UsersModule, PetsModule,],
+  }), UsersModule, PetsModule, TurnosModule],
   controllers: [AppController],
   providers: [AppService],
 })
