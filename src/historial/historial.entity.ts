@@ -7,7 +7,7 @@ export class historial{
     IdHistoria:number
 
     @Column()
-    IdMascota:number
+    IdTurno:number
 
     @Column()
     fecha:Date

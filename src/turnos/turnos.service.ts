@@ -19,6 +19,7 @@ import { pet } from 'src/pets/pet.entity';
 import { terminarCitaDto } from './DTO/terminar-cita.dto';
 import { turnosDisponiblesDto } from './DTO/turnos-disponibles.dto';
 import { historial } from '../historial/historial.entity';
+import { user } from 'src/users/user.entity';
 
 @Injectable()
 export class TurnosService {
@@ -39,7 +40,7 @@ export class TurnosService {
 
   //1- En usuarios service. (Ver psicologos)
 
-  //2- Ver turnos disponibles LISTO
+  //2- Ver turnos disponibles LISTO. me muestra mal los turnos disponibles
   async getHorariosDisponibles(
     turnosDisponibles: turnosDisponiblesDto,
   ): Promise<Date[]> {
@@ -155,25 +156,22 @@ export class TurnosService {
     }
   }
 
-  //4- ver mis turnos TENGO QUE HACER LAS RELACIONES
-  async verTurnos(IdUsuario: number): Promise<any> {
-    const result = await this.entityManager
-      .query(`SELECT IdTurno, Fecha_inicio, Fecha_fin, IdEstado, Nombre, IdCliente 
-    FROM Turnos t 
-    JOIN Mascotas m ON t.IdMascota = m.IdMascota 
-    JOIN Usuarios u ON m.IdCliente = u.IdUsuario 
-    WHERE IdEstado = 1 AND IdCliente = ${IdUsuario}`);
-    return result;
-
-    //   const result = await this.entityManager.createQueryBuilder()
-    //   .select(["Turnos.IdTurno", "Turnos.Fecha_inicio", "Turnos.Fecha_fin", "Turnos.IdEstado", "Mascotas.Nombre", "Mascotas.IdCliente"])
-    //   .from("Turnos", "Turnos")
-    //   .innerJoin("Turnos.IdMascota", "Mascotas.IdMascota")
-    //   .innerJoin("Mascotas.cliente", "Usuarios")
-    //   .where("Turnos.IdEstado = :idEstado AND Mascotas.IdCliente = :idCliente", { idEstado: 1, idCliente: IdUsuario })
-    //   .getRawMany();
-    // return result;
+  //4- ver mis turnos LISTO
+  async obtenerTurnosMascotas(IdCliente:number): Promise<pet[]>{
+    return this.petRepository.find({
+      where: {
+        IdCliente: IdCliente,
+        turno: {
+          IdEstado: 1,
+        },
+      },
+      
+      relations: {
+          turno: true,
+      },
+  })
   }
+
 
   //5- cencelar un turno LISTO
   async cancelarTurno(IdTurno: number): Promise<any> {
@@ -187,15 +185,20 @@ export class TurnosService {
     return 'Turno cancelado con exito';
   }
 
-  //6-ver informacion de la mascota, con turnos e historial
-  async infoMascotaTurno(IdMascota: number): Promise<any> {
-    const result = await this.entityManager
-      .query(`select m.IdMascota, m.IdCliente, m.Nombre, m.Tipo, t.IdTurno, t.Fecha_inicio, t.Fecha_fin, h.descripcion
-    from Mascotas m join Turnos t on m.IdMascota = t.IdMascota join Historial h on t.IdMascota = h.IdMascota
-    where m.IdMascota = ${IdMascota}`);
-
-    return result;
-  }
+  //6-ver informacion de la mascota, con turnos e historial. ERROR muestra un solo turno
+    async obtenerTurnosHistorial(IdMascota:number): Promise<pet[]>{
+      return this.petRepository.find({
+        where: {
+          IdMascota: IdMascota
+        },
+        relations: {
+          turno: {
+              historial: true,
+          },
+        },
+      })
+    }
+  
 
   //7- Ver mis citas (Admin y psicologo) LISTO
 
@@ -236,7 +239,7 @@ export class TurnosService {
       .where('IdTurno = :IdTurno', {IdTurno})
       .execute();
 
-      const IdMascota = turno.IdMascota
+      //const IdTurno = turno.IdTurno
       const fecha = new Date();
       const descripcion = turno.descripcion;
 
@@ -246,22 +249,19 @@ export class TurnosService {
       .into(historial)
       .values
       ({
-        IdMascota : IdMascota,
+        IdTurno : IdTurno,
         fecha: fecha,
         Descripcion : descripcion,
       })
       .execute();
+
+      return("Turno finalizado. Historial cargado con exito");
   
 
   }
 
-  //obtengo tipo de mascota
 
-  async tipoMascota(IdMascota: number) {
-    return await this.petRepository.findOne({
-      where: {
-        IdMascota: IdMascota,
-      },
-    });
-  }
+  
+
+ 
 }

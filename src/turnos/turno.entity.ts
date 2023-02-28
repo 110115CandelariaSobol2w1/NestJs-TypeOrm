@@ -1,5 +1,6 @@
+import { historial } from "src/historial/historial.entity";
 import { pet } from "src/pets/pet.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity({name: 'Turnos'})
 export class turno{
@@ -21,6 +22,10 @@ export class turno{
 
     @Column()
     IdPsicologo:number
+
+    @OneToOne(() => historial)
+    @JoinColumn({name: 'IdTurno'})
+    historial:historial
 
     
 

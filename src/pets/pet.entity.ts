@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
+import { turno } from "src/turnos/turno.entity";
+import { user } from "src/users/user.entity";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity({name: 'Mascotas'})
 export class pet{
@@ -14,4 +16,13 @@ export class pet{
 
     @Column()
     Tipo:string
+
+    @OneToOne(() => turno)
+    @JoinColumn({name: 'IdMascota'})
+    turno: turno;
+
+    @OneToOne(() => user)
+    @JoinColumn({name: 'IdCliente'})
+    user:user
+
 }

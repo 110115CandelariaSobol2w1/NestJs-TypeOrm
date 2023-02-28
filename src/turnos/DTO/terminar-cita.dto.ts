@@ -1,5 +1,5 @@
 export class terminarCitaDto{
     IdTurno:number
-    IdMascota:number
+    //IdMascota:number
     descripcion:string
 }

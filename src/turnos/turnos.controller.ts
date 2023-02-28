@@ -22,9 +22,10 @@ export class TurnosController {
     }
 
     //@UseGuards(JwtAuthGuard)
+    //4
     @Get('mascotas/usuarios/:IdUsuario')
-    obtenerMascotasUsuarios(@Param('IdUsuario') IdUsuario: number){
-        return this.turnosService.verTurnos(IdUsuario);
+    obtenerTurnoMascota(@Param('IdCliente') IdCliente:number){
+            return this.turnosService.obtenerTurnosMascotas(IdCliente);
     }
 
     @Post('cancelar/:IdTurno')
@@ -34,7 +35,7 @@ export class TurnosController {
 
     @Get('mascotas/historial/:IdMascota')
     obtenerMascotasTurnosHistorial(@Param('IdMascota') IdMascota: number){
-        return this.turnosService.infoMascotaTurno(IdMascota);
+        return this.turnosService.obtenerTurnosHistorial(IdMascota);
     }
 
     //7
@@ -69,4 +70,9 @@ export class TurnosController {
         obtenerTipo(@Param('IdMascota') IdMascota: number){
             return this.turnosService.tipoMascota(IdMascota)
         }
+
+          
+
+        
 }
+
