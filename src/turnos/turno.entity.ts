@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import { pet } from "src/pets/pet.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity({name: 'Turnos'})
 export class turno{
@@ -20,4 +21,7 @@ export class turno{
 
     @Column()
     IdPsicologo:number
+
+    
+
 }

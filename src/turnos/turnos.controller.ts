@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { consultarTurnosDto } from './DTO/consultar-turnos.dto';
 import { registrarTurnoDto } from './DTO/registrar-turno.dto';
 import { terminarCitaDto } from './DTO/terminar-cita.dto';
+import { turnosDisponiblesDto } from './DTO/turnos-disponibles.dto';
 import { turno } from './turno.entity';
 import { TurnosService } from './turnos.service';
 
@@ -56,4 +57,16 @@ export class TurnosController {
       terminarCita(@Body() turno: terminarCitaDto){
         return this.turnosService.terminarCita(turno)
       }
+
+      //2 - ver turnos disponibles
+      @Get('/disponibles')
+      consultarTurnosDisponibles(@Body() turno : turnosDisponiblesDto) {
+         return this.turnosService.getHorariosDisponibles(turno)
+        }
+
+
+        @Get('tipoMascota/:IdMascota')
+        obtenerTipo(@Param('IdMascota') IdMascota: number){
+            return this.turnosService.tipoMascota(IdMascota)
+        }
 }
