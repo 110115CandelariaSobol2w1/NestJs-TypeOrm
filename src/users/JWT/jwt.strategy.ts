@@ -7,7 +7,7 @@ import { Request } from "express";
 
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy){
+export class JwtStrategy extends PassportStrategy(Strategy, 'admin'){
     constructor(){
         super({
             jwtFromRequest:ExtractJwt.fromAuthHeaderAsBearerToken(),

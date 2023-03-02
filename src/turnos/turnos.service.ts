@@ -27,6 +27,7 @@ export class TurnosService {
     @InjectRepository(turno) private turnoRepository: Repository<turno>,
     @InjectRepository(pet) private petRepository: Repository<pet>,
     @InjectRepository(historial) private historialRepository: Repository<historial>,
+    @InjectRepository(user) private userRepository: Repository<user>,
     private readonly entityManager: EntityManager,
   ) {}
 
@@ -38,7 +39,18 @@ export class TurnosService {
     return await this.turnoRepository.find();
   }
 
-  //1- En usuarios service. (Ver psicologos)
+  //1- Obtener psicologos LISTO
+  async obtenerPsicologos() : Promise<user[]>{
+    return this.userRepository.find({
+      select: {
+          username: true,
+          IdUsuario: true,
+      },
+      where: {
+        IdRol: 3,
+    },
+  })
+  }
 
   //2- Ver turnos disponibles LISTO. me muestra mal los turnos disponibles
   async getHorariosDisponibles(
@@ -73,10 +85,22 @@ export class TurnosService {
     while (hora <= fechaFin) {
       // verificar si la hora está disponible
       const horaFin = new Date(hora.getTime() + duracion * 60000);
-      const disponible = !turnos.some(
-        (turno) => turno.Fecha_inicio <= hora && turno.Fecha_fin >= horaFin,
-      );
-      if (disponible) {
+      const disponible = await this.turnoRepository.count({
+        where: [
+          {
+            Fecha_inicio: LessThanOrEqual(horaFin),
+            Fecha_fin: MoreThanOrEqual(hora),
+          },
+          {
+            Fecha_inicio: LessThan(hora),
+            Fecha_fin: MoreThan(horaFin),
+          },
+        ],
+      });
+
+      console.log("DISPONIBILIDAD " + " " + disponible);
+    
+      if (disponible == 0) {
         horariosDisponibles.push(new Date(hora));
       }
       // avanzar a la siguiente hora
@@ -98,15 +122,16 @@ export class TurnosService {
     });
     const Tipo = obtengoTipo[0].Tipo;
     const Fecha_inicio = new Date(nuevoTurno.Fecha_inicio);
+    let nuevaFechaFin;
     if (Tipo === 'perro') {
       console.log('el tiempo de la consulta es 30m');
       //Seteo la fecha fin segun el tipo de animal
-      const nuevaFechaFin = new Date(Fecha_inicio.getTime() + 30 * 60000);
+      nuevaFechaFin = new Date(Fecha_inicio.getTime() + 30 * 60000);
       nuevoTurno.Fecha_fin = nuevaFechaFin;
     } else if (Tipo === 'gato') {
       console.log('el tiempo de la consulta es 45m');
       //Seteo la fecha fin segun el tipo de animal
-      const nuevaFechaFin = new Date(Fecha_inicio.getTime() + 45 * 60000);
+      nuevaFechaFin = new Date(Fecha_inicio.getTime() + 45 * 60000);
       nuevoTurno.Fecha_fin = nuevaFechaFin;
     }
 
@@ -141,10 +166,11 @@ export class TurnosService {
         const registrandoTurno = this.turnoRepository.create({
           IdMascota: nuevoTurno.IdMascota,
           Fecha_inicio: nuevoTurno.Fecha_inicio,
-          Fecha_fin: nuevoTurno.Fecha_fin, //no me toma la nueva fecha de fin.
+          Fecha_fin: nuevaFechaFin, //no me toma la nueva fecha de fin.
           IdEstado: nuevoTurno.IdEstado,
           IdPsicologo: nuevoTurno.IdPsicologo,
         });
+        console.log("MUESTRO FECHA FIN " + nuevaFechaFin)
         await this.turnoRepository.save(registrandoTurno);
         // const registroTurno = await this.entityManager.query(`insert into Turnos (IdMascota, Fecha_inicio, Fecha_fin, IdEstado, IdPsicologo) values (${nuevoTurno.IdMascota}, '${Fecha_inicio.toISOString()}', '${nuevoTurno.Fecha_fin.toISOString()}', 1, ${nuevoTurno.IdPsicologo})`)
         return 'registrando turno';
@@ -161,13 +187,13 @@ export class TurnosService {
     return this.petRepository.find({
       where: {
         IdCliente: IdCliente,
-        turno: {
+        turnos: {
           IdEstado: 1,
         },
       },
       
       relations: {
-          turno: true,
+          turnos: true,
       },
   })
   }
@@ -185,19 +211,20 @@ export class TurnosService {
     return 'Turno cancelado con exito';
   }
 
-  //6-ver informacion de la mascota, con turnos e historial. ERROR muestra un solo turno
+  //6-ver informacion de la mascota, con turnos e historial. LISTO
     async obtenerTurnosHistorial(IdMascota:number): Promise<pet[]>{
       return this.petRepository.find({
         where: {
           IdMascota: IdMascota
         },
         relations: {
-          turno: {
+          turnos: {
               historial: true,
           },
         },
       })
     }
+  
   
 
   //7- Ver mis citas (Admin y psicologo) LISTO

@@ -23,7 +23,8 @@ import { historial } from './historial/historial.entity';
     pet,user, turno, historial
    ],
     extra:{trustServerCertificate:true}
-  }), UsersModule, PetsModule, TurnosModule, HistorialModule],
+  }), UsersModule, PetsModule, TurnosModule, HistorialModule,
+  TypeOrmModule.forFeature([turno, pet]),],
   controllers: [AppController],
   providers: [AppService],
 })
