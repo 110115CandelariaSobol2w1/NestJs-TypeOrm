@@ -3,11 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { turno } from './turno.entity';
 import {
-  DataSource,
   EntityManager,
-  getConnection,
-  getConnectionManager,
-  getRepository,
   LessThan,
   LessThanOrEqual,
   MoreThan,
@@ -26,7 +22,8 @@ export class TurnosService {
   constructor(
     @InjectRepository(turno) private turnoRepository: Repository<turno>,
     @InjectRepository(pet) private petRepository: Repository<pet>,
-    @InjectRepository(historial) private historialRepository: Repository<historial>,
+    @InjectRepository(historial)
+    private historialRepository: Repository<historial>,
     @InjectRepository(user) private userRepository: Repository<user>,
     private readonly entityManager: EntityManager,
   ) {}
@@ -40,16 +37,16 @@ export class TurnosService {
   }
 
   //1- Obtener psicologos LISTO
-  async obtenerPsicologos() : Promise<user[]>{
+  async obtenerPsicologos(): Promise<user[]> {
     return this.userRepository.find({
       select: {
-          username: true,
-          IdUsuario: true,
+        username: true,
+        IdUsuario: true,
       },
       where: {
         IdRol: 3,
-    },
-  })
+      },
+    });
   }
 
   //2- Ver turnos disponibles LISTO. me muestra mal los turnos disponibles
@@ -98,8 +95,8 @@ export class TurnosService {
         ],
       });
 
-      console.log("DISPONIBILIDAD " + " " + disponible);
-    
+      console.log('DISPONIBILIDAD ' + ' ' + disponible);
+
       if (disponible == 0) {
         horariosDisponibles.push(new Date(hora));
       }
@@ -109,8 +106,8 @@ export class TurnosService {
     return horariosDisponibles;
   }
 
-  //3- Registrar un turno
-  async register(nuevoTurno: registrarTurnoDto) {
+  //3 - Registrar un turno LISTO
+  async nuevoTurno(nuevoTurno: registrarTurnoDto) {
     //primero obtengo el tipo para ver el tiempo de la consulta
     const obtengoTipo = await await this.petRepository.find({
       select: {
@@ -121,19 +118,6 @@ export class TurnosService {
       },
     });
     const Tipo = obtengoTipo[0].Tipo;
-    const Fecha_inicio = new Date(nuevoTurno.Fecha_inicio);
-    let nuevaFechaFin;
-    if (Tipo === 'perro') {
-      console.log('el tiempo de la consulta es 30m');
-      //Seteo la fecha fin segun el tipo de animal
-      nuevaFechaFin = new Date(Fecha_inicio.getTime() + 30 * 60000);
-      nuevoTurno.Fecha_fin = nuevaFechaFin;
-    } else if (Tipo === 'gato') {
-      console.log('el tiempo de la consulta es 45m');
-      //Seteo la fecha fin segun el tipo de animal
-      nuevaFechaFin = new Date(Fecha_inicio.getTime() + 45 * 60000);
-      nuevoTurno.Fecha_fin = nuevaFechaFin;
-    }
 
     //verifico que la mascota no tenga un turno dado
     const verificoTurno = await await this.turnoRepository.count({
@@ -143,9 +127,12 @@ export class TurnosService {
       },
     });
     const turno = verificoTurno;
-    console.log(turno + 'cantidad de turnos');
-    console.log(turno);
-    if (turno == 0) {
+
+    if (Tipo === 'perro' && turno == 0) {
+      const Fecha_inicio = new Date(nuevoTurno.Fecha_inicio);
+      const nuevaFechaFin = new Date(Fecha_inicio.getTime() + 30 * 60000);
+      nuevoTurno.Fecha_fin = nuevaFechaFin;
+
       //Si la mascota no tiene un turno dado verifico si hay lugar entre la fecha de inicio y fin
       console.log('verificando disponibilidad');
 
@@ -156,34 +143,66 @@ export class TurnosService {
         },
       });
 
-      // const verificacion = await this.entityManager.query(`SELECT COUNT(*) verificacion
-      //                                                     FROM Turnos t
-      //                                                     WHERE Fecha_inicio < '${nuevoTurno.Fecha_fin.toISOString()}' AND Fecha_fin >  '${Fecha_inicio.toISOString()}'`);
       const verificacionLugar = verificacion;
-
+      const IdEstado = 1
+      //si hay lugar en las fechas registro el turno
       if (verificacionLugar == 0) {
         console.log('hay lugar en las fechas seleccionadas');
         const registrandoTurno = this.turnoRepository.create({
           IdMascota: nuevoTurno.IdMascota,
           Fecha_inicio: nuevoTurno.Fecha_inicio,
           Fecha_fin: nuevaFechaFin, //no me toma la nueva fecha de fin.
-          IdEstado: nuevoTurno.IdEstado,
+          IdEstado: IdEstado,
           IdPsicologo: nuevoTurno.IdPsicologo,
         });
-        console.log("MUESTRO FECHA FIN " + nuevaFechaFin)
+
         await this.turnoRepository.save(registrandoTurno);
-        // const registroTurno = await this.entityManager.query(`insert into Turnos (IdMascota, Fecha_inicio, Fecha_fin, IdEstado, IdPsicologo) values (${nuevoTurno.IdMascota}, '${Fecha_inicio.toISOString()}', '${nuevoTurno.Fecha_fin.toISOString()}', 1, ${nuevoTurno.IdPsicologo})`)
+
         return 'registrando turno';
       } else {
-        return ' no hay lugar en la fecha y horario solicitado';
+        return 'No hay lugar en las fechas solicitadas';
       }
-    } else {
-      return 'ERROR: tiene turnos activos';
+    } else if (Tipo === 'gato' && turno == 0) {
+      const Fecha_inicio = new Date(nuevoTurno.Fecha_inicio);
+      const nuevaFechaFin = new Date(Fecha_inicio.getTime() + 45 * 60000);
+      nuevoTurno.Fecha_fin = nuevaFechaFin;
+
+      //Si la mascota no tiene un turno dado verifico si hay lugar entre la fecha de inicio y fin
+      console.log('verificando disponibilidad');
+
+      const verificacion = await this.turnoRepository.count({
+        where: {
+          Fecha_inicio: LessThanOrEqual(nuevoTurno.Fecha_fin),
+          Fecha_fin: MoreThanOrEqual(nuevoTurno.Fecha_inicio),
+        },
+      });
+
+      const verificacionLugar = verificacion;
+      const IdEstado = 1
+      //si hay lugar en las fechas registro el turno
+      if (verificacionLugar == 0) {
+        console.log('hay lugar en las fechas seleccionadas');
+        const registrandoTurno = this.turnoRepository.create({
+          IdMascota: nuevoTurno.IdMascota,
+          Fecha_inicio: nuevoTurno.Fecha_inicio,
+          Fecha_fin: nuevaFechaFin, //no me toma la nueva fecha de fin.
+          IdEstado: IdEstado,
+          IdPsicologo: nuevoTurno.IdPsicologo,
+        });
+
+        await this.turnoRepository.save(registrandoTurno);
+
+        return 'registrando turno';
+      } else {
+        return 'No hay lugar en las fechas solicitadas';
+      }
+    } else if (turno == 1) {
+      return 'La mascota ya tiene un turno activo registrado';
     }
   }
 
   //4- ver mis turnos LISTO
-  async obtenerTurnosMascotas(IdCliente:number): Promise<pet[]>{
+  async obtenerTurnosMascotas(IdCliente: number): Promise<pet[]> {
     return this.petRepository.find({
       where: {
         IdCliente: IdCliente,
@@ -191,13 +210,12 @@ export class TurnosService {
           IdEstado: 1,
         },
       },
-      
-      relations: {
-          turnos: true,
-      },
-  })
-  }
 
+      relations: {
+        turnos: true,
+      },
+    });
+  }
 
   //5- cencelar un turno LISTO
   async cancelarTurno(IdTurno: number): Promise<any> {
@@ -212,20 +230,18 @@ export class TurnosService {
   }
 
   //6-ver informacion de la mascota, con turnos e historial. LISTO
-    async obtenerTurnosHistorial(IdMascota:number): Promise<pet[]>{
-      return this.petRepository.find({
-        where: {
-          IdMascota: IdMascota
+  async obtenerTurnosHistorial(IdMascota: number): Promise<pet[]> {
+    return this.petRepository.find({
+      where: {
+        IdMascota: IdMascota,
+      },
+      relations: {
+        turnos: {
+          historial: true,
         },
-        relations: {
-          turnos: {
-              historial: true,
-          },
-        },
-      })
-    }
-  
-  
+      },
+    });
+  }
 
   //7- Ver mis citas (Admin y psicologo) LISTO
 
@@ -262,33 +278,25 @@ export class TurnosService {
     const queryBuilder = this.turnoRepository
       .createQueryBuilder()
       .update(turno)
-      .set({IdEstado: IdEstado})
-      .where('IdTurno = :IdTurno', {IdTurno})
+      .set({ IdEstado: IdEstado })
+      .where('IdTurno = :IdTurno', { IdTurno })
       .execute();
 
-      //const IdTurno = turno.IdTurno
-      const fecha = new Date();
-      const descripcion = turno.descripcion;
+    //const IdTurno = turno.IdTurno
+    const fecha = new Date();
+    const descripcion = turno.descripcion;
 
-      const queryhistorial = this.historialRepository
+    const queryhistorial = this.historialRepository
       .createQueryBuilder()
       .insert()
       .into(historial)
-      .values
-      ({
-        IdTurno : IdTurno,
+      .values({
+        IdTurno: IdTurno,
         fecha: fecha,
-        Descripcion : descripcion,
+        Descripcion: descripcion,
       })
       .execute();
 
-      return("Turno finalizado. Historial cargado con exito");
-  
-
+    return 'Turno finalizado. Historial cargado con exito';
   }
-
-
-  
-
- 
 }

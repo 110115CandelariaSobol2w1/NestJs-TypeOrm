@@ -38,9 +38,9 @@ export class TurnosController {
 
   //3 - registrar turno
   @UseGuards(AuthGuard('PsicoCliente'))
-  @Post('/probando')
-  registrarTurno(@Body() turno: registrarTurnoDto) {
-    return this.turnosService.register(turno);
+  @Post('/registrando')
+  registrarTurno2(@Body() turno: registrarTurnoDto) {
+    return this.turnosService.nuevoTurno(turno)
   }
 
   
@@ -79,4 +79,6 @@ export class TurnosController {
   terminarCita(@Body() turno: terminarCitaDto) {
     return this.turnosService.terminarCita(turno);
   }
+
+ 
 }
