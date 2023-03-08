@@ -17,6 +17,10 @@ export class UsersService {
         return await this.userRepository.find();
       }
 
+      async getUserById(id:number): Promise<user>{
+        return await this.userRepository.findOne({where: {IdUsuario: id}})
+      }
+
       async register(userObject : CreateUserDto){
         const {password} = userObject;
         const plainToHash = await argon2.hash(password);

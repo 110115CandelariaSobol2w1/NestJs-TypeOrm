@@ -40,6 +40,10 @@ export class PetsService {
         return this.petsRepository.find({ where: { IdCliente: IdUsuario } });
       }
 
+      async getPetById(id:number): Promise<pet>{
+        return await this.petsRepository.findOne({where: {IdMascota: id}})
+      }
+
     
 
 

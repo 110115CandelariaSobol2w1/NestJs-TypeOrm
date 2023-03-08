@@ -12,6 +12,7 @@ import { TurnosService } from './turnos.service';
 export class TurnosController {
   constructor(private turnosService: TurnosService) {}
 
+
   @Get('turnos')
   obtenerUsuarios() {
     return this.turnosService.findAll();

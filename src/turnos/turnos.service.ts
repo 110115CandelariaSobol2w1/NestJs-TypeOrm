@@ -78,31 +78,36 @@ export class TurnosService {
     });
 
     const horariosDisponibles = []; //creo array para guardar los turnos disponibles
-    let hora = fechaInicio;
-    while (hora <= fechaFin) {
+    let horaFechaInicio = fechaInicio;
+    while (horaFechaInicio <= fechaFin) {
       // verificar si la hora está disponible
-      const horaFin = new Date(hora.getTime() + duracion * 60000);
-      const disponible = await this.turnoRepository.count({
+      const horaFin = new Date(horaFechaInicio.getTime() + duracion * 60000);
+      const disponible = await this.turnoRepository.
+      count({
         where: [
           {
             Fecha_inicio: LessThanOrEqual(horaFin),
-            Fecha_fin: MoreThanOrEqual(hora),
+            Fecha_fin: MoreThanOrEqual(horaFechaInicio),
           },
           {
-            Fecha_inicio: LessThan(hora),
-            Fecha_fin: MoreThan(horaFin),
+            Fecha_inicio: LessThan(fechaInicio),
+            Fecha_fin: MoreThan(horaFechaInicio),
           },
+          
         ],
+        
       });
 
       console.log('DISPONIBILIDAD ' + ' ' + disponible);
 
       if (disponible == 0) {
-        horariosDisponibles.push(new Date(hora));
+        horariosDisponibles.push(new Date(horaFechaInicio));
       }
       // avanzar a la siguiente hora
-      hora = new Date(hora.getTime() + 15 * 60000); // avanzar en bloques de 15 minutos
+      horaFechaInicio = new Date(horaFechaInicio.getTime() + 15 * 60000); // avanzar en bloques de 15 minutos
     }
+
+    
     return horariosDisponibles;
   }
 
