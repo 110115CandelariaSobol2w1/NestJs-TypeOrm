@@ -72,6 +72,7 @@ describe('UsersController', () => {
 
   describe('loginUser', () => {
     it('should return a JWT access token', async () => {
+      //objeto simulado
       const userObjectLogin: LoginUserDto = {
         username: 'testusername',
         password: 'testpassword',
@@ -87,9 +88,11 @@ describe('UsersController', () => {
   /////////////////////////////////////////
   describe('obtenerUsuarios', () => {
     it('should return an array of users', async () => {
+      //simulacion del objeto que debemos obtener como respuesta
       const result: user[] = [{ IdUsuario: 1, username: 'test1', password: '12345', IdRol: 1 }, { IdUsuario: 2, username: 'test', password: '12345', IdRol: 1 }];
+      //jest spyOn crea una instancia del objeto y espia en sus metodos. Espiamos en el metodo findAll
       jest.spyOn(service, 'findAll').mockImplementation(() => Promise.resolve(result));
-
+      //Esta es la prueba en si. Espera que el resultado obtenido sea igual al resultado esperado.
       expect(await controller.obtenerUsuarios()).toEqual(result);
     });
   });
