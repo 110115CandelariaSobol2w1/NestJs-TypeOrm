@@ -35,12 +35,11 @@ export class psicologoClienteStrategy extends PassportStrategy(
 
   async validate(req:Request,payload: any) {
     console.log('IdRol muestro rol' + payload.IdRol);
-    //const idUsuarioRequest = payload.idUsuario;
     console.log(payload.IdUsuario);
     const { IdMascota } = req.body;
     const query = await this.petService.getPetById(IdMascota)
     console.log(query.IdCliente);
-    //console.log("devuelvo id " + usuario + "comparo id " + payload.IdUsuario)
+    
 
     if (payload.IdRol === 1 || payload.IdRol === 2 && query.IdCliente === payload.IdUsuario) {
       

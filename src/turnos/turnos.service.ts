@@ -16,6 +16,7 @@ import { terminarCitaDto } from './DTO/terminar-cita.dto';
 import { turnosDisponiblesDto } from './DTO/turnos-disponibles.dto';
 import { historial } from '../historial/historial.entity';
 import { user } from 'src/users/user.entity';
+import { Console } from 'console';
 
 @Injectable()
 export class TurnosService {
@@ -49,10 +50,8 @@ export class TurnosService {
     });
   }
 
-  //2- Ver turnos disponibles LISTO. me muestra mal los turnos disponibles
-  async getHorariosDisponibles(
-    turnosDisponibles: turnosDisponiblesDto,
-  ): Promise<Date[]> {
+  //2- Ver turnos disponibles LISTO.
+  async getHorariosDisponibles(turnosDisponibles: turnosDisponiblesDto,): Promise<Date[]> {
     //primero obtengo el tipo para ver el tiempo de la consulta
     const obtengoTipo = await await this.petRepository.find({
       select: {
@@ -64,9 +63,13 @@ export class TurnosService {
     });
     const tipo = obtengoTipo[0].Tipo;
     const duracion = tipo === 'gato' ? 45 : 30; // duración según el tipo de mascota
-    const fechaInicio = new Date(turnosDisponibles.fecha); // convertir la fecha a un objeto Date
+    const fechaString = turnosDisponibles.fecha;
+    const fechaSplit = fechaString.split('/');
+    var fechaDate = new Date(`${fechaSplit[2]}/${fechaSplit[1]}/${fechaSplit[0]}`);
+
+    const fechaInicio = new Date(fechaDate); // convertir la fecha a un objeto Date
     fechaInicio.setHours(9, 0, 0, 0); // establecer la hora de inicio de la agenda
-    const fechaFin = new Date(turnosDisponibles.fecha);
+    const fechaFin = new Date(fechaDate);
     fechaFin.setHours(18, 0, 0, 0); // establecer la hora de fin de la agenda
 
     //obtengo los turnos programados para esa fecha
@@ -78,36 +81,44 @@ export class TurnosService {
     });
 
     const horariosDisponibles = []; //creo array para guardar los turnos disponibles
-    let horaFechaInicio = fechaInicio;
-    while (horaFechaInicio <= fechaFin) {
+    let hora = fechaInicio;
+    while (hora <= fechaFin) {
       // verificar si la hora está disponible
-      const horaFin = new Date(horaFechaInicio.getTime() + duracion * 60000);
-      const disponible = await this.turnoRepository.
-      count({
+      const horaFin = new Date(hora.getTime() + duracion * 60000);
+      const disponible = await this.turnoRepository.count({
         where: [
           {
             Fecha_inicio: LessThanOrEqual(horaFin),
-            Fecha_fin: MoreThanOrEqual(horaFechaInicio),
+            Fecha_fin: MoreThanOrEqual(hora),
           },
           {
-            Fecha_inicio: LessThan(fechaInicio),
-            Fecha_fin: MoreThan(horaFechaInicio),
+            Fecha_inicio: LessThan(hora),
+            Fecha_fin: MoreThan(horaFin),
           },
-          
         ],
-        
       });
+
+      // var reservas = await this.turnoRepository.createQueryBuilder('turnos')
+      // .select('COUNT(*)', 'cantidad_reservas_superpuestas')
+      // .where(
+      //   '((Fecha_inicio <= :fecha_inicio AND Fecha_fin > :fecha_inicio) OR ' +
+      //     '(Fecha_inicio < :fecha_fin AND Fecha_fin >= :fecha_fin) OR ' +
+      //     '(Fecha_inicio >= :fecha_inicio AND Fecha_fin <= :fecha_fin))',
+      //   { fecha_inicio: hora, fecha_fin: horaFin },
+      // )
+      // .getRawMany();
+
+      // return reservas.cantidad_reservas_superpuestas
+    
 
       console.log('DISPONIBILIDAD ' + ' ' + disponible);
 
       if (disponible == 0) {
-        horariosDisponibles.push(new Date(horaFechaInicio));
+        horariosDisponibles.push(new Date(hora));
       }
       // avanzar a la siguiente hora
-      horaFechaInicio = new Date(horaFechaInicio.getTime() + 15 * 60000); // avanzar en bloques de 15 minutos
+      hora = new Date(hora.getTime() + 15 * 60000); // avanzar en bloques de 15 minutos
     }
-
-    
     return horariosDisponibles;
   }
 
@@ -140,16 +151,16 @@ export class TurnosService {
 
       //Si la mascota no tiene un turno dado verifico si hay lugar entre la fecha de inicio y fin
       console.log('verificando disponibilidad');
-
+      //check_in <= @Check_out AND check_out > @Check_in
       const verificacion = await this.turnoRepository.count({
         where: {
           Fecha_inicio: LessThanOrEqual(nuevoTurno.Fecha_fin),
-          Fecha_fin: MoreThanOrEqual(nuevoTurno.Fecha_inicio),
+          Fecha_fin: MoreThan(nuevoTurno.Fecha_inicio),
         },
       });
 
       const verificacionLugar = verificacion;
-      const IdEstado = 1
+      const IdEstado = 1;
       //si hay lugar en las fechas registro el turno
       if (verificacionLugar == 0) {
         console.log('hay lugar en las fechas seleccionadas');
@@ -183,7 +194,7 @@ export class TurnosService {
       });
 
       const verificacionLugar = verificacion;
-      const IdEstado = 1
+      const IdEstado = 1;
       //si hay lugar en las fechas registro el turno
       if (verificacionLugar == 0) {
         console.log('hay lugar en las fechas seleccionadas');

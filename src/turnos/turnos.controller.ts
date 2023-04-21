@@ -31,7 +31,7 @@ export class TurnosController {
   }
 
   //2 - ver turnos disponibles
-  @UseGuards(AuthGuard('PsicoCliente'))
+  //@UseGuards(AuthGuard('PsicoCliente'))
   @Get('/disponibles')
   consultarTurnosDisponibles(@Body() turno: turnosDisponiblesDto) {
     return this.turnosService.getHorariosDisponibles(turno);
@@ -69,7 +69,7 @@ export class TurnosController {
   //7 - Ver mis citas psicologo
   //@UseGuards(AuthGuard('psicologo'))
   @UseGuards(AuthGuard('AdminPsico'))
-  @Get('/psicologos')
+  @Get('/turnos/psicologos')
   consultarTurnos(@Body() turno: consultarTurnosDto) {
     return this.turnosService.consultarTurnos(turno);
   }
